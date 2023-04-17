@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.bkm.sbb.answer.Answer;
 import com.bkm.sbb.answer.AnswerForm;
+import com.bkm.sbb.answer.AnswerService;
 import com.bkm.sbb.user.SiteUser;
 import com.bkm.sbb.user.UserService;
 
@@ -30,6 +32,7 @@ public class QuestionController {
 
     private final QuestionService questionService;		// questionService 객체는 생성자 방식으로 DI 규칙에 의해 주입된다.
     private final UserService userService;
+    private final AnswerService answerService;
     
     @GetMapping("/list")
     public String list(Model model, @RequestParam(value="page", defaultValue="0") int page, @RequestParam(value = "kw", defaultValue = "") String kw) {
@@ -39,10 +42,20 @@ public class QuestionController {
         return "question_list";
     }
     
-    @GetMapping(value = "/detail/{id}")
+    /* @GetMapping(value = "/detail/{id}")
     public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm) {
         Question question = this.questionService.getQuestion(id);
         model.addAttribute("question", question);
+        return "question_detail";
+    } */
+    
+	@GetMapping(value = "/detail/{id}")
+    public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm, 
+    		@RequestParam(value = "answerPage", defaultValue = "0") int answerPage) {
+		Question question = this.questionService.getQuestion(id);
+		Page<Answer> answerPaging =  this.answerService.getList(question, answerPage);
+        model.addAttribute("question", question);
+        model.addAttribute("answerPaging", answerPaging);
         return "question_detail";
     }
     
@@ -62,7 +75,7 @@ public class QuestionController {
         this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser);
         return "redirect:/question/list";
     }
-    
+        
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
     public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {

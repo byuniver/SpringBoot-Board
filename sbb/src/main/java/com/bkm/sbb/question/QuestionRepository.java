@@ -30,4 +30,12 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
             + "   or a.content like %:kw% "
             + "   or u2.username like %:kw% ")
     Page<Question> findAllByKeyword(@Param("kw") String kw, Pageable pageable);
+    
+    @Query("select q "
+            + "from Question q "
+            + "join SiteUser u on q.author=u "
+            + "where u.username = :username "
+            + "order by q.createDate desc ")
+        List<Question> findCurrentQuestion(@Param("username") String username,
+            Pageable pageable);
 }

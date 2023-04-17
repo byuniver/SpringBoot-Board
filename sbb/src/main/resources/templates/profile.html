@@ -1,0 +1,36 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+    <section>
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="my-3" th:text="${username}"></h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <h5>최근 게시글</h5>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <th:block th:each="question: ${questionList}">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0" th:text="${question.subject}"></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0" th:text="${question.createDate}"></p>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+</script>
+</html>

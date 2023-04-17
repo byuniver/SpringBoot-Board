@@ -1,13 +1,20 @@
 package com.bkm.sbb.user;
 
+import java.security.Principal;
+
 import javax.validation.Valid;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.bkm.sbb.answer.AnswerService;
+import com.bkm.sbb.question.QuestionService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
-
+    private final QuestionService questionService;
+    private final AnswerService answerService;
+    
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
         return "signup_form";
@@ -53,5 +62,15 @@ public class UserController {
     @GetMapping("/login")
     public String login() {
         return "login_form";
+    }
+    
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/profile")
+    public String profile(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
+        model.addAttribute("questionList",
+            questionService.getCurrentListByUser(username, 5));
+        return "profile";
     }
 }

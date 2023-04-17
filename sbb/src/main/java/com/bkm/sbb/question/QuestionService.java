@@ -59,15 +59,30 @@ public class QuestionService {
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
         return this.questionRepository.findAllByKeyword(kw, pageable);
     }
-    
-    public Question getQuestion(Integer id) {  
+
+    /* public Question getQuestion(Integer id) {  
         Optional<Question> question = this.questionRepository.findById(id);
         if (question.isPresent()) {
             return question.get();
         } else {
             throw new DataNotFoundException("question not found");
         }
+    } */
+    
+    public Question getQuestion(Integer id) {
+	Optional<Question> question = this.questionRepository.findById(id);
+		if (question.isPresent()) 
+		{
+			Question question1 = question.get();
+			question1.setView(question1.getView()+1);	
+			this.questionRepository.save(question1);
+				return question1;
+		} 
+		else {
+            throw new DataNotFoundException("question not found");
+        }
     }
+
     
     public void create(String subject, String content, SiteUser user) {
         Question q = new Question();
@@ -92,5 +107,10 @@ public class QuestionService {
     public void vote(Question question, SiteUser siteUser) {
         question.getVoter().add(siteUser);
         this.questionRepository.save(question);
+    }
+    
+    public List<Question> getCurrentListByUser(String username, int num) {
+        Pageable pageable = PageRequest.of(0, num);
+        return questionRepository.findCurrentQuestion(username, pageable);
     }
 }
