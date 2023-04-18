@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.bkm.sbb.answer.Answer;
+import com.bkm.sbb.category.Category;
 import com.bkm.sbb.user.SiteUser;
 
 import lombok.Getter;
@@ -50,4 +51,6 @@ public class Question {
 	@Column(columnDefinition = "integer default 0", nullable = false)
 	private int view;
 	
+    @ManyToOne
+    private Category category;
 }

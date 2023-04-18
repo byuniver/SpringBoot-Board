@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.w3.org/1999/html">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -8,18 +8,32 @@
     <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
     <!-- sbb CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/style.css}">
-    <title>게시판</title>
+    <!--markdown editor-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 </head>
 <body>
-<!-- 네비게이션바 -->
-<nav th:replace="~{navbar :: navbarFragment}"></nav>
-<!-- 기본 템플릿 안에 삽입될 내용 Start -->
-<th:block layout:fragment="content"></th:block>
-<!-- 기본 템플릿 안에 삽입될 내용 End -->
+<nav th:replace="navbar :: navbarFragment"></nav>
+
+<div class="container mt-3" style="height: auto !important;">
+    <div class="row" style="height: auto !important;">
+        <div class="col-sm-12 col-md-3 col-lg-2 p-2">
+            <nav th:replace="sidebar :: sidebarFragment"></nav>
+        </div>
+        <div class="col-sm-12 col-md-9 col-lg-10 p-2">
+            <!-- 기본 템플릿 안에 삽입될 내용 Start -->
+            <th:block layout:fragment="content"></th:block>
+            <!-- 기본 템플릿 안에 삽입될 내용 End -->
+        </div>
+    </div>
+</div>
+<!-- JQuery-->
+<script th:src="@{/jquery-3.6.4.min.js}"></script>
 <!-- Bootstrap JS -->
 <script th:src="@{/bootstrap.min.js}"></script>
 <!-- 자바스크립트 Start -->
 <th:block layout:fragment="script"></th:block>
 <!-- 자바스크립트 End -->
+
 </body>
 </html>

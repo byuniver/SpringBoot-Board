@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.bkm.sbb.DataNotFoundException;
 import com.bkm.sbb.answer.Answer;
+import com.bkm.sbb.category.Category;
 import com.bkm.sbb.user.SiteUser;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
-    private Specification<Question> search(String kw) {
+    /* private Specification<Question> search(String kw, int categoryId) {
         return new Specification<>() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -47,7 +48,31 @@ public class QuestionService {
                         cb.like(u2.get("username"), "%" + kw + "%"));   // 답변 작성자 
             }
         };
+    } */
+    
+    private Specification<Question> search(String kw, int categoryId) {
+        return new Specification<>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Predicate toPredicate(Root<Question> q, CriteriaQuery<?> query, CriteriaBuilder builder) {
+                query.distinct(true); //중복제거
+                Join<Question, SiteUser> u1 = q.join("author", JoinType.LEFT);
+                Join<Question, Answer> a = q.join("answerList", JoinType.LEFT);
+                Join<Answer, SiteUser> u2 = a.join("author", JoinType.LEFT);
+                return
+                        builder.and(builder.equal(q.get("category").get("id"), categoryId),
+                                builder.or(builder.like(q.get("subject"), "%" + kw + "%"), //제목
+                                        builder.like(q.get("content"), "%" + kw + "%"), //내용
+                                        builder.like(u1.get("username"), "%" + kw + "%"), // 질문 작성자
+                                        builder.like(a.get("content"), "%" + kw + "%"), // 답변 내용
+                                        builder.like(u2.get("username"), "%" + kw + "%"))
+                        );
+            }
+
+        };
     }
+    
     
     public List<Question> getList() {
         return this.questionRepository.findAll();
@@ -58,6 +83,17 @@ public class QuestionService {
         sorts.add(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
         return this.questionRepository.findAllByKeyword(kw, pageable);
+    }
+    
+    public Page<Question> getList(int page, String kw, Category category) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+        Specification<Question> spec = search(kw, category.getId());
+        //순수 쿼리로 작성한 경우
+        //return this.questionRepository.findAllByKeyword(kw, category.getId(), pageable);
+        //Specification 사용한 경우
+        return this.questionRepository.findAll(spec, pageable);
     }
 
     /* public Question getQuestion(Integer id) {  
@@ -84,10 +120,11 @@ public class QuestionService {
     }
 
     
-    public void create(String subject, String content, SiteUser user) {
+    public void create(String subject, String content, SiteUser user, Category category) {
         Question q = new Question();
         q.setSubject(subject);
         q.setContent(content);
+        q.setCategory(category);
         q.setCreateDate(LocalDateTime.now());
         q.setAuthor(user);
         this.questionRepository.save(q);
